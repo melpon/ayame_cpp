@@ -38,7 +38,7 @@ fi
 
 
 # boost
-if [ $BOOST_CHANGED -eq 1 -o ! -e $INSTALL_DIR/boost/lib/libboost_system.a ]; then
+if [ $BOOST_CHANGED -eq 1 -o ! -e $INSTALL_DIR/boost/lib/libboost_filesystem.a ]; then
   _VERSION_UNDERSCORE=${BOOST_VERSION//./_}
   _URL=https://dl.bintray.com/boostorg/release/${BOOST_VERSION}/source/boost_${_VERSION_UNDERSCORE}.tar.gz
   _FILE=$BUILD_DIR/boost_${_VERSION_UNDERSCORE}.tar.gz
@@ -53,7 +53,7 @@ if [ $BOOST_CHANGED -eq 1 -o ! -e $INSTALL_DIR/boost/lib/libboost_system.a ]; th
 
     pushd boost_${_VERSION_UNDERSCORE}
       ./bootstrap.sh
-      ./b2 install --prefix=$INSTALL_DIR/boost --build-dir=build link=static --with-system
+      ./b2 install --prefix=$INSTALL_DIR/boost --build-dir=build link=static --with-filesystem
     popd
   popd
 fi

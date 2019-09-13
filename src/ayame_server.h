@@ -11,8 +11,8 @@
 #include <boost/asio.hpp>
 
 class AyameServer : public std::enable_shared_from_this<AyameServer> {
+  boost::asio::io_context& ioc_;
   boost::asio::ip::tcp::acceptor acceptor_;
-  boost::asio::ip::tcp::socket socket_;
 
  public:
   AyameServer(boost::asio::io_context& ioc,
@@ -22,7 +22,8 @@ class AyameServer : public std::enable_shared_from_this<AyameServer> {
 
  private:
   void doAccept();
-  void onAccept(boost::system::error_code ec);
+  void onAccept(boost::system::error_code ec,
+                boost::asio::ip::tcp::socket socket);
 };
 
 #endif  // AYAME_SERVER_H_INCLUDED

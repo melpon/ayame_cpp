@@ -4,14 +4,16 @@ project(ayame-cpp C CXX)
 
 set(Boost_USE_STATIC_LIBS ON)
 
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS filesystem)
 find_package(JSON REQUIRED)
 find_package(CLI11 REQUIRED)
 find_package(Spdlog REQUIRED)
 
 set(_SOURCES
   src/main.cpp
+  src/util.cpp
   src/ayame_server.cpp
+  src/ayame_session.cpp
 )
 
 add_executable(ayame ${_SOURCES})
@@ -35,7 +37,7 @@ if (ENABLE_ASAN)
 endif()
 
 target_link_libraries(ayame
-  Boost::system
+  Boost::filesystem
   JSON::JSON
   CLI11::CLI11
   Spdlog::Spdlog)

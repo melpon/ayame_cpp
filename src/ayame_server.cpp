@@ -1,10 +1,13 @@
 #include "ayame_server.h"
 
 #include <spdlog/spdlog.h>
+#include <boost/beast.hpp>
+
+#include "ayame_session.h"
 
 AyameServer::AyameServer(boost::asio::io_context& ioc,
                          boost::asio::ip::tcp::endpoint endpoint)
-    : acceptor_(ioc), socket_(ioc) {
+    : ioc_(ioc), acceptor_(ioc) {
   boost::system::error_code ec;
 
   // Open the acceptor
@@ -42,16 +45,17 @@ void AyameServer::run() {
 }
 
 void AyameServer::doAccept() {
-  acceptor_.async_accept(socket_,
-                         std::bind(&AyameServer::onAccept, shared_from_this(),
-                                   std::placeholders::_1));
+  acceptor_.async_accept(boost::asio::make_strand(ioc_),
+                         boost::beast::bind_front_handler(
+                             &AyameServer::onAccept, shared_from_this()));
 }
 
-void AyameServer::onAccept(boost::system::error_code ec) {
+void AyameServer::onAccept(boost::system::error_code ec,
+                           boost::asio::ip::tcp::socket socket) {
   if (ec) {
     SPDLOG_ERROR("accept: {}", ec.message());
   } else {
-    // std::make_shared<AyameSession>(std::move(socket_))->run();
+    std::make_shared<AyameSession>(std::move(socket))->run();
   }
 
   doAccept();
