@@ -14,6 +14,7 @@
 #include <codecvt>
 #endif
 
+#include "ayame_websocket_session.h"
 #include "util.h"
 
 AyameSession::AyameSession(boost::asio::ip::tcp::socket socket)
@@ -48,10 +49,10 @@ void AyameSession::onRead(boost::system::error_code ec,
   }
 
   // WebSocket の upgrade リクエスト
-  if (req_.target() == "/ws") {
+  if (req_.target() == "/signaling") {
     if (boost::beast::websocket::is_upgrade(req_)) {
-      //P2PWebsocketSession::make_shared(std::move(socket_))
-      //    ->run(std::move(req_));
+      std::make_shared<AyameWebsocketSession>(std::move(socket_))
+          ->run(std::move(req_));
       return;
     } else {
       sendResponse(Util::badRequest(std::move(req_), "Not upgrade request"));

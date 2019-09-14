@@ -12,8 +12,10 @@ find_package(Spdlog REQUIRED)
 set(_SOURCES
   src/main.cpp
   src/util.cpp
+  src/websocket.cpp
   src/ayame_server.cpp
   src/ayame_session.cpp
+  src/ayame_websocket_session.cpp
 )
 
 add_executable(ayame ${_SOURCES})
