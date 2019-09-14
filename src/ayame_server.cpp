@@ -55,7 +55,7 @@ void AyameServer::onAccept(boost::system::error_code ec,
   if (ec) {
     SPDLOG_ERROR("accept: {}", ec.message());
   } else {
-    std::make_shared<AyameSession>(std::move(socket))->run();
+    std::make_shared<AyameSession>(std::move(socket), &hub_)->run();
   }
 
   doAccept();

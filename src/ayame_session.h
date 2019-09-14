@@ -14,15 +14,18 @@
 #include <boost/beast/http/string_body.hpp>
 #include <boost/beast/http/write.hpp>
 
+#include "ayame_hub.h"
+
 // 1つの HTTP リクエストを処理するためのクラス
 class AyameSession : public std::enable_shared_from_this<AyameSession> {
+  AyameHub* hub_;
   boost::asio::ip::tcp::socket socket_;
   boost::beast::flat_buffer buffer_;
   boost::beast::http::request<boost::beast::http::string_body> req_;
   std::shared_ptr<void> res_;
 
  public:
-  AyameSession(boost::asio::ip::tcp::socket socket);
+  AyameSession(boost::asio::ip::tcp::socket socket, AyameHub* hub);
 
   void run();
 

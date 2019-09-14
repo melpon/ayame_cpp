@@ -10,9 +10,13 @@
 
 #include <boost/asio.hpp>
 
+#include "ayame_hub.h"
+
 class AyameServer : public std::enable_shared_from_this<AyameServer> {
   boost::asio::io_context& ioc_;
   boost::asio::ip::tcp::acceptor acceptor_;
+
+  AyameHub hub_;
 
  public:
   AyameServer(boost::asio::io_context& ioc,

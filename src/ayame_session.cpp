@@ -17,8 +17,8 @@
 #include "ayame_websocket_session.h"
 #include "util.h"
 
-AyameSession::AyameSession(boost::asio::ip::tcp::socket socket)
-    : socket_(std::move(socket)) {}
+AyameSession::AyameSession(boost::asio::ip::tcp::socket socket, AyameHub* hub)
+    : socket_(std::move(socket)), hub_(hub) {}
 
 void AyameSession::run() { doRead(); }
 
@@ -51,7 +51,7 @@ void AyameSession::onRead(boost::system::error_code ec,
   // WebSocket の upgrade リクエスト
   if (req_.target() == "/signaling") {
     if (boost::beast::websocket::is_upgrade(req_)) {
-      std::make_shared<AyameWebsocketSession>(std::move(socket_))
+      std::make_shared<AyameWebsocketSession>(std::move(socket_), hub_)
           ->run(std::move(req_));
       return;
     } else {

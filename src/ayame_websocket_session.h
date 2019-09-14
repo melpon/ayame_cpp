@@ -10,15 +10,19 @@
 #include <boost/beast/http/string_body.hpp>
 #include <boost/system/error_code.hpp>
 
+#include "ayame_hub.h"
 #include "websocket.h"
 
 class AyameWebsocketSession
     : public std::enable_shared_from_this<AyameWebsocketSession> {
+  AyameHub* hub_;
   std::unique_ptr<Websocket> ws_;
   boost::beast::multi_buffer sending_buffer_;
+  std::string room_id_;
+  std::string client_id_;
 
  public:
-  AyameWebsocketSession(boost::asio::ip::tcp::socket socket);
+  AyameWebsocketSession(boost::asio::ip::tcp::socket socket, AyameHub* hub);
   ~AyameWebsocketSession();
   void run(boost::beast::http::request<boost::beast::http::string_body> req);
 

@@ -11,12 +11,13 @@
 using json = nlohmann::json;
 
 AyameWebsocketSession::AyameWebsocketSession(
-    boost::asio::ip::tcp::socket socket)
-    : ws_(new Websocket(std::move(socket))) {
+    boost::asio::ip::tcp::socket socket, AyameHub* hub)
+    : ws_(new Websocket(std::move(socket))), hub_(hub) {
   SPDLOG_DEBUG("constructed AyameWebsocketSession");
 }
 
 AyameWebsocketSession::~AyameWebsocketSession() {
+  hub_->Unregister(room_id_, client_id_);
   SPDLOG_DEBUG("destructed AyameWebsocketSession");
 }
 
@@ -59,28 +60,42 @@ void AyameWebsocketSession::onRead(boost::system::error_code ec,
     return;
   }
 
-  json recv_message;
-
   SPDLOG_INFO("recv_string={}", recv_string);
 
-  //try
-  //{
-  //    recv_message = json::parse(recv_string);
-  //}
-  //catch (json::parse_error &e)
-  //{
-  //    return;
-  //}
+  json recv_message;
 
-  //std::string type;
-  //try
-  //{
-  //  type = recv_message["type"];
-  //}
-  //catch (json::type_error &e)
-  //{
-  //    return;
-  //}
+  try {
+    recv_message = json::parse(recv_string);
+  } catch (json::parse_error& e) {
+    SPDLOG_ERROR("invalid JSON format");
+    return;
+  }
+
+  if (recv_message.find("type") == recv_message.end()) {
+    SPDLOG_ERROR("invalid message: type not found");
+    return;
+  }
+
+  std::string type = recv_message.at("type");
+  if (type == "register") {
+    std::string room_id = recv_message.at("roomId");
+    std::string client_id = recv_message.at("clientId");
+    std::string key = recv_message.value("key", "");
+    nlohmann::json metadata =
+        recv_message.value("metadata", nlohmann::json::object());
+    hub_->Register(room_id, client_id, key, metadata,
+                   [this](std::string message) { ws_->sendText(message); });
+    room_id_ = room_id;
+    client_id_ = client_id;
+
+    ws_->sendText(nlohmann::json(AcceptMessage{"accept"}).dump());
+  } else {
+    if (room_id_.empty() || client_id_.empty()) {
+      SPDLOG_ERROR("does not registered");
+      return;
+    }
+    hub_->Broadcast(room_id_, client_id_, recv_string);
+  }
 
   //if (type == "offer")
   //{
